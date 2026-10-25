@@ -718,46 +718,15 @@ st.markdown(f"""
         <span>🏆 <b>{gems_count}</b> Gems (9.3+)</span>
     </div>
 </div>
-
-<div class="stories-row">
-    <div class="story-item">
-        <div class="story-ring"><div class="story-inner">🇿🇦</div></div>
-        <div class="story-label">Tlhabi</div>
-    </div>
-    <div class="story-item">
-        <div class="story-ring"><div class="story-inner">🇫🇷</div></div>
-        <div class="story-label">Niels</div>
-    </div>
-    <div class="story-item">
-        <div class="story-ring gold"><div class="story-inner">🏆</div></div>
-        <div class="story-label">Top Gems ({gems_count})</div>
-    </div>
-    <div class="story-item">
-        <div class="story-ring"><div class="story-inner">🦁</div></div>
-        <div class="story-label">SA Wines ({sa_count})</div>
-    </div>
-    <div class="story-item">
-        <div class="story-ring"><div class="story-inner">🐓</div></div>
-        <div class="story-label">FR Wines ({fr_count})</div>
-    </div>
-    <div class="story-item">
-        <div class="story-ring gold"><div class="story-inner">💑</div></div>
-        <div class="story-label">Date Nights</div>
-    </div>
-    <div class="story-item">
-        <div class="story-ring"><div class="story-inner">🤖</div></div>
-        <div class="story-label">Menu AI</div>
-    </div>
-</div>
 """, unsafe_allow_html=True)
 
-nav_options = ["📱 Wine Feed", "🌍 Wine Map", "➕ Record Wine", "📊 Stats & Battle", "🤖 AI Sommelier"]
+nav_options = ["📱 Wine Feed", "🌍 Wine Map", "➕ Record Wine", "📊 Stats & Battle", "🤖 AI Sommelier", "👤 Profile"]
 default_nav_idx = st.session_state.get("nav_target_idx", 0)
 
 selected_tab = option_menu(
     menu_title=None,
     options=nav_options,
-    icons=["grid-3x3-gap-fill", "globe-europe-africa", "plus-circle-fill", "bar-chart-fill", "stars"],
+    icons=["grid-3x3-gap-fill", "globe-europe-africa", "plus-circle-fill", "bar-chart-fill", "stars", "person-heart"],
     default_index=default_nav_idx,
     orientation="horizontal",
     styles={
@@ -1153,27 +1122,6 @@ elif selected_tab == "📱 Wine Feed":
 
             st.markdown("</div>", unsafe_allow_html=True)
 
-    with st.expander("💾 Cellar Backup & Export / Import JSON", expanded=False):
-        bk1, bk2 = st.columns(2)
-        bk1.download_button(
-            "📥 Download Full Cellar Backup (wine_cellar.json)",
-            data=json.dumps(st.session_state.wines, ensure_ascii=False, indent=2),
-            file_name="wine_cellar_backup.json",
-            mime="application/json",
-            use_container_width=True,
-        )
-        up_bk = bk2.file_uploader("📤 Restore / Merge Cellar JSON", type=["json"], key="restore_cellar_json")
-        if up_bk is not None and bk2.button("Restore Cellar", use_container_width=True):
-            try:
-                loaded_bk = json.load(up_bk)
-                if isinstance(loaded_bk, list):
-                    st.session_state.wines = loaded_bk
-                    save_wines(loaded_bk)
-                    st.success("✅ Cellar restored successfully!")
-                    st.rerun()
-            except Exception as bke:
-                st.error(f"Invalid JSON: {bke}")
-
 
 # ==========================================
 # TAB 2: 🌍 WINE MAP (TERROIRS & TASTING SPOTS)
@@ -1562,41 +1510,13 @@ elif selected_tab == "📊 Stats & Battle":
 
 
 # ==========================================
-# TAB 5: 🤖 AI SOMMELIER (RESTAURANT MENU PHOTO + FREE-TEXT PREFS + CHAT)
+# TAB 5: 🤖 AI SOMMELIER (RESTAURANT MENU PHOTO + CHAT)
 # ==========================================
 elif selected_tab == "🤖 AI Sommelier":
     st.markdown("<h2 style='color:#f8fafc; margin-bottom:4px;'>🤖 Personal AI Sommelier &amp; Restaurant Menu Scanner</h2>", unsafe_allow_html=True)
-    st.caption("Take a photo of the food & wine menu at the restaurant, tell us what you feel like eating, and our AI Sommelier will pick the best bottles for Tlhabi 🇿🇦 & Niels 🇫🇷!")
+    st.caption("Take a photo of the food & wine menu at the restaurant, tell us what you feel like eating, and our AI Sommelier will pick the best bottles for Tlhabi 🇿🇦 & Niels 🇫🇷 based on your cellar and your **👤 Profile** preferences!")
 
-    # 1. FREE-TEXT TASTE PROFILES FOR TLHABI & NIELS
-    with st.expander("📝 Our Personal Taste Profiles & Free-Text Notes (Used by the AI Sommelier)", expanded=True):
-        pr_c1, pr_c2 = st.columns(2)
-        t_pref_in = pr_c1.text_area(
-            "🇿🇦 Tlhabi's Free-Text Wine & Food Preferences",
-            value=st.session_state.prefs.get("tlhabi_prefs", ""),
-            height=105,
-            help="Write anything Tlhabi loves or dislikes (grapes, regions, sweetness, acidity, favourite dishes)...",
-        )
-        n_pref_in = pr_c2.text_area(
-            "🇫🇷 Niels's Free-Text Wine & Food Preferences",
-            value=st.session_state.prefs.get("niels_prefs", ""),
-            height=105,
-            help="Write anything Niels loves or dislikes (terroirs, tannins, minerality, favourite dishes)...",
-        )
-        sh_pref_in = st.text_input(
-            "👫 Shared Couple Notes & Typical Restaurant Budget",
-            value=st.session_state.prefs.get("shared_notes", ""),
-        )
-        if st.button("💾 Save Our Taste Preferences", type="primary"):
-            st.session_state.prefs = {
-                "tlhabi_prefs": t_pref_in.strip(),
-                "niels_prefs": n_pref_in.strip(),
-                "shared_notes": sh_pref_in.strip(),
-            }
-            save_preferences(st.session_state.prefs)
-            st.success("✅ Tlhabi & Niels's personal taste profiles saved!")
-
-    # 2. RESTAURANT MENU & WINE LIST PHOTO ADVISOR
+    # 1. RESTAURANT MENU & WINE LIST PHOTO ADVISOR
     st.markdown("<div class='ig-card'><div class='ig-body'>", unsafe_allow_html=True)
     st.markdown("<h3 style='font-size:17px; color:#f8fafc; margin-top:0;'>📸 At the Restaurant: Scan Food &amp; Drinks Menu</h3>", unsafe_allow_html=True)
     st.caption("Upload or take a photo of the wine list and/or food menu. You can upload multiple pages!")
@@ -1656,7 +1576,7 @@ Provide a fun, warm, expert recommendation structured as:
 
     st.markdown("</div></div>", unsafe_allow_html=True)
 
-    # 3. INTERACTIVE SOMMELIER CHAT
+    # 2. INTERACTIVE SOMMELIER CHAT
     st.markdown("<h3 style='font-size:17px; color:#f8fafc;'>💬 Chat Anytime with Your AI Sommelier</h3>", unsafe_allow_html=True)
 
     quick_qs = {
@@ -1677,7 +1597,7 @@ Provide a fun, warm, expert recommendation structured as:
         if not st.session_state.sommelier_chat:
             with st.chat_message("assistant"):
                 st.markdown(
-                    "🥂 **Bonjour Niels 🇫🇷 & Sawubona Tlhabi 🇿🇦!** I am your personal AI Sommelier. "
+                    "🥂 **Dumela Tlhabi 🇿🇦 & Bonjour Niels 🇫🇷!** I am your personal AI Sommelier. "
                     "I know your cellar ratings and your personal taste notes. Snap a restaurant menu above or ask me anything below!"
                 )
         for msg in st.session_state.sommelier_chat:
@@ -1692,7 +1612,7 @@ Provide a fun, warm, expert recommendation structured as:
                 with st.spinner("Consulting the cellar..."):
                     sys_instruction = (
                         "You are the warm, witty, and world-class private Sommelier for Tlhabi (from South Africa) and Niels (from France). "
-                        "Always tailor your advice to both of their palates and their tasting history.\n"
+                        "Use 'Dumela' when greeting Tlhabi in a South African way. Always tailor your advice to both of their palates and their tasting history.\n"
                         + build_sommelier_context(wines, st.session_state.prefs)
                     )
                     history_context = "\n".join([f"{m['role'].upper()}: {m['text']}" for m in st.session_state.sommelier_chat[-6:]])
@@ -1702,3 +1622,73 @@ Provide a fun, warm, expert recommendation structured as:
                         st.session_state.sommelier_chat.append({"role": "assistant", "text": ans})
                     else:
                         st.error(f"Error: {err_c}")
+
+
+# ==========================================
+# TAB 6: 👤 PROFILE (PERSONAL PREFERENCES & CELLAR BACKUP)
+# ==========================================
+elif selected_tab == "👤 Profile":
+    st.markdown("<h2 style='color:#f8fafc; margin-bottom:4px;'>👤 Our Personal Wine &amp; Food Profiles</h2>", unsafe_allow_html=True)
+    st.caption("Tell your AI Sommelier what each of you loves, dislikes, and looks for in a bottle or on a restaurant menu.")
+
+    st.markdown("<div class='ig-card'><div class='ig-body'>", unsafe_allow_html=True)
+    st.markdown("<h3 style='font-size:17px; color:#f8fafc; margin-top:0;'>📝 Personal Taste Profiles (Used by AI Sommelier)</h3>", unsafe_allow_html=True)
+
+    pr_c1, pr_c2 = st.columns(2)
+    with pr_c1:
+        st.markdown("<h4 style='color:#86efac; margin:0 0 6px 0;'>🇿🇦 Tlhabi's Profile (South Africa)</h4>", unsafe_allow_html=True)
+        t_pref_in = st.text_area(
+            "What Tlhabi loves & dislikes (grapes, regions, wine styles, dishes):",
+            value=st.session_state.prefs.get("tlhabi_prefs", ""),
+            height=140,
+            key="prof_tlhabi_txt",
+        )
+    with pr_c2:
+        st.markdown("<h4 style='color:#7dd3fc; margin:0 0 6px 0;'>🇫🇷 Niels's Profile (France)</h4>", unsafe_allow_html=True)
+        n_pref_in = st.text_area(
+            "What Niels loves & dislikes (terroirs, tannins, minerality, dishes):",
+            value=st.session_state.prefs.get("niels_prefs", ""),
+            height=140,
+            key="prof_niels_txt",
+        )
+
+    sh_pref_in = st.text_area(
+        "👫 Shared Couple Notes, Favorite Occasions & Typical Restaurant / Wine Shop Budget",
+        value=st.session_state.prefs.get("shared_notes", ""),
+        height=80,
+        key="prof_shared_txt",
+    )
+
+    if st.button("💾 Save Our Taste Preferences", type="primary", use_container_width=True):
+        st.session_state.prefs = {
+            "tlhabi_prefs": t_pref_in.strip(),
+            "niels_prefs": n_pref_in.strip(),
+            "shared_notes": sh_pref_in.strip(),
+        }
+        save_preferences(st.session_state.prefs)
+        st.success("✅ Tlhabi & Niels's personal taste profiles saved to your private vault!")
+
+    st.markdown("</div></div>", unsafe_allow_html=True)
+
+    st.markdown("<div class='ig-card'><div class='ig-body'>", unsafe_allow_html=True)
+    st.markdown("<h3 style='font-size:16px; color:#f8fafc; margin-top:0;'>💾 Private Cellar Backup &amp; Restore</h3>", unsafe_allow_html=True)
+    bk1, bk2 = st.columns(2)
+    bk1.download_button(
+        "📥 Download Full Cellar Backup (wine_cellar.json)",
+        data=json.dumps(st.session_state.wines, ensure_ascii=False, indent=2),
+        file_name="wine_cellar_backup.json",
+        mime="application/json",
+        use_container_width=True,
+    )
+    up_bk = bk2.file_uploader("📤 Restore / Merge Cellar JSON", type=["json"], key="profile_restore_json")
+    if up_bk is not None and bk2.button("Restore Cellar", use_container_width=True):
+        try:
+            loaded_bk = json.load(up_bk)
+            if isinstance(loaded_bk, list):
+                st.session_state.wines = loaded_bk
+                save_wines(loaded_bk)
+                st.success("✅ Cellar restored successfully!")
+                st.rerun()
+        except Exception as bke:
+            st.error(f"Invalid JSON: {bke}")
+    st.markdown("</div></div>", unsafe_allow_html=True)
