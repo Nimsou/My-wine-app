@@ -1,0 +1,8 @@
+streamlit>=1.35
+plotly>=5.24
+pandas
+numpy
+requests
+Pillow
+streamlit-option-menu
+google-generativeai
